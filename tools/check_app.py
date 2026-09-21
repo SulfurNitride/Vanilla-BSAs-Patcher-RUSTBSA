@@ -42,7 +42,10 @@ try:
             result[path] = response.status
 except Exception as error:
     result["error"] = str(error)
-Path(__file__).with_name("browser.json").write_text(json.dumps(result))
+output = Path(__file__).with_name("browser.json")
+staging = output.with_suffix(".tmp")
+staging.write_text(json.dumps(result))
+staging.replace(output)
 ''', encoding="utf-8")
         environment = dict(os.environ, BROWSER=f'"{Path(sys.executable).as_posix()}" "{browser.as_posix()}" %s')
         with (temp / "app.log").open("w+") as log:

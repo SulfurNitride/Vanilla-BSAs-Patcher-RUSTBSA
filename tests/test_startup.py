@@ -36,7 +36,10 @@ def browser(url):
             result = dict(status=response.status, body=response.read().decode())
     except Exception as error:
         result = dict(error=str(error))
-    Path({str(result)!r}).write_text(json.dumps(result), encoding="utf-8")
+    output = Path({str(result)!r})
+    staging = output.with_suffix(".tmp")
+    staging.write_text(json.dumps(result), encoding="utf-8")
+    staging.replace(output)
 ready = patcher.open_browser_when_ready
 patcher.open_browser_when_ready = lambda *args: ready(*args, opener=browser)
 start = patcher.eel.start
@@ -59,7 +62,12 @@ patcher.launch_app(port={port})
                     self.assertIn("BSAs at once", response["body"])
                     self.assertIn("/eel.js", response["body"])
                 finally:
-                    process.terminate()
+                    # Windows virtualenv Python is a launcher with a child
+                    # process; terminate the whole test-owned tree.
+                    if sys.platform == "win32":
+                        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True)
+                    else:
+                        process.terminate()
                     try:
                         process.wait(timeout=5)
                     except subprocess.TimeoutExpired:
