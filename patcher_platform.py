@@ -10,10 +10,15 @@ def find_child(directory, name):
     """Resolve Bethesda/Steam names on case-sensitive filesystems."""
     directory = Path(directory)
     exact = directory / name
-    if exact.exists():
+    # Windows exists() also accepts differently cased names. Enumerate there
+    # so replacing an existing archive preserves its actual spelling on disk.
+    if exact.exists() and sys.platform != "win32":
         return exact
     if directory.is_dir():
         matches = [p for p in directory.iterdir() if p.name.casefold() == name.casefold()]
+        for match in matches:
+            if match.name == name:
+                return match
         if len(matches) > 1:
             raise ValueError(f"Ambiguous filename '{name}' in {directory}")
         if matches:
