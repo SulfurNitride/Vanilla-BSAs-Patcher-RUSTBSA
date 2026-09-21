@@ -70,6 +70,19 @@ staging.replace(output)
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait()
+                if sys.platform == "win32":
+                    # taskkill returns before Windows always releases the
+                    # bootloader child's mapped executable. Wait for that
+                    # handle to close before TemporaryDirectory removes it.
+                    deadline = time.monotonic() + 10
+                    while True:
+                        try:
+                            executable.unlink()
+                            break
+                        except PermissionError:
+                            if time.monotonic() >= deadline:
+                                raise
+                            time.sleep(0.1)
 
 
 if __name__ == "__main__":
