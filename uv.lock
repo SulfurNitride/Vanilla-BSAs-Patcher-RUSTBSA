@@ -579,7 +579,7 @@ wheels = [
 
 [[package]]
 name = "vanilla-bsas-patcher"
-version = "1.0.2"
+version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "blake3" },

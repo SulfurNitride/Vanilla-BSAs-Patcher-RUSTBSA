@@ -1,6 +1,6 @@
 [project]
 name = "Vanilla-BSAs-Patcher"
-version = "1.0.2"
+version = "0.0.1"
 description = "Decompresses archives for better loading time and fixes vanilla audio not playing. All configurable through a simple web UI."
 readme = "README.md"
 requires-python = ">=3.12"

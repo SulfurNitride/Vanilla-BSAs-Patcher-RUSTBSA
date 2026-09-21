@@ -1,0 +1,77 @@
+name: Windows and Linux
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux
+          - os: windows-latest
+            platform: windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - run: uv sync --locked
+      - name: Download released archive CLI
+        run: uv run python tools/download_backend.py
+      - name: Test real archive operations and browser startup
+        run: uv run python -m unittest discover -s tests -v
+      - name: Build standalone application
+        run: uv run python tools/build_app.py
+      - name: Check the packaged application's first browser load
+        run: uv run python tools/check_app.py
+      - name: Package application
+        run: uv run python tools/package_app.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Vanilla-BSAs-Patcher-${{ matrix.platform }}-x86_64
+          path: dist/release/*
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os, tomllib
+          with open("pyproject.toml", "rb") as source:
+              version = tomllib.load(source)["project"]["version"]
+          assert os.environ["RELEASE_TAG"].removeprefix("v") == version
+          PY
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: Vanilla-BSAs-Patcher-*
+          path: release
+          merge-multiple: true
+      - name: Create checksums
+        working-directory: release
+        run: sha256sum *.tar.gz *.zip > SHA256SUMS
+      - name: Publish both platforms
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" release/* --verify-tag --title "$RELEASE_TAG" --notes-file .github/RELEASE_NOTES.md

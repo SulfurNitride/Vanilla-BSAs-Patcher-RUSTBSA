@@ -4,3 +4,7 @@ dist
 *.exe
 *.vcdiff
 Test
+.venv/
+__pycache__/
+*.egg-info/
+/bsa-ba2-tool

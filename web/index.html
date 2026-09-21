@@ -46,6 +46,15 @@
                 <input type="checkbox" id="split_mp3" onchange="validateOptions()">
                 Exclude MP3s from packing (unnecessary if <a href="https://www.nexusmods.com/newvegas/mods/66347" target="_blank">Stewie Tweaks</a> >=9.85 is installed)
             </label>
+            <div class="form-group">
+                <label for="archive-workers">BSAs at once:</label>
+                <select id="archive-workers">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
         </div>
 
         <div class="card">
@@ -171,7 +180,8 @@
                 decompress: document.getElementById('decompress').checked,
                 ogg_to_wav: document.getElementById('ogg_to_wav').checked,
                 upgrade_vorbis: document.getElementById('upgrade_vorbis').checked,
-                split_mp3: document.getElementById('split_mp3').checked
+                split_mp3: document.getElementById('split_mp3').checked,
+                archive_workers: Number(document.getElementById('archive-workers').value)
             };
 
             // Disable everything while processing
@@ -179,6 +189,7 @@
             btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
             document.getElementById('data-path').disabled = true;
             document.getElementById('custom-path').disabled = true;
+            document.getElementById('archive-workers').disabled = true;
             document.querySelectorAll('.card input[type="checkbox"]').forEach(cb => cb.disabled = true);
             document.querySelectorAll('.browse-btn').forEach(b => b.disabled = true);
 
@@ -198,6 +209,7 @@
             // Restore when done
             document.getElementById('data-path').disabled = false;
             document.getElementById('custom-path').disabled = false;
+            document.getElementById('archive-workers').disabled = false;
             document.querySelectorAll('.card input[type="checkbox"]').forEach(cb => cb.disabled = false);
             document.querySelectorAll('.browse-btn').forEach(b => b.disabled = false);
 
