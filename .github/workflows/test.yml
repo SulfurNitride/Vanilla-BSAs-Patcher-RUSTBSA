@@ -33,7 +33,7 @@ jobs:
         run: uv run python -m unittest discover -s tests -v
       - name: Build standalone application
         run: uv run python tools/build_app.py
-      - name: Check the packaged application's first browser load
+      - name: Check packaged startup and backend download
         run: uv run python tools/check_app.py
       - name: Package application
         run: uv run python tools/package_app.py

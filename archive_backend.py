@@ -7,11 +7,14 @@ from pathlib import Path
 import platform
 import re
 import shutil
+import ssl
 import sys
 import tarfile
 import tempfile
 import urllib.request
 import zipfile
+
+import certifi
 
 REPOSITORY = "SulfurNitride/Rust-BSA-BA2-Handler"
 LATEST_RELEASE = f"https://api.github.com/repos/{REPOSITORY}/releases/latest"
@@ -75,7 +78,11 @@ def _request(url):
         "User-Agent": "Vanilla-BSAs-Patcher",
         "Accept": "application/vnd.github+json" if url == LATEST_RELEASE else "application/octet-stream",
     })
-    return urllib.request.urlopen(request, timeout=20)
+    # A frozen Linux interpreter may look for its build machine's CA paths.
+    # Include portable roots while retaining any certificates trusted locally.
+    context = ssl.create_default_context()
+    context.load_verify_locations(cafile=certifi.where())
+    return urllib.request.urlopen(request, timeout=20, context=context)
 
 
 def _asset_url(assets, name):

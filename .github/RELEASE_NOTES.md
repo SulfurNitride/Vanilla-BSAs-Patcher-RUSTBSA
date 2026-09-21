@@ -1,4 +1,6 @@
-First release of the Rust BSA backend fork, based on Ungeziefi's Vanilla BSAs Patcher.
+Rust BSA backend fork, based on Ungeziefi's Vanilla BSAs Patcher.
+
+**0.0.2 fixes HTTPS downloads on Linux distributions whose certificate-store paths differ from the build machine, including Arch.** Trusted CA certificates are now bundled, and the packaged app is tested downloading its archive backend from an empty cache. HTTPS verification remains enabled.
 
 - Native Linux and Windows x86_64 applications, with the UI and patching assets included.
 - Automatically downloads and verifies the latest stable Rust BSA/BA2 Handler CLI (0.0.4 or newer). A verified cached download is available when offline.
